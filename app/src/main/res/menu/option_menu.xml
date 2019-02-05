@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/us"
+        android:title="US" />
+    <item android:id="@+id/de"
+        android:title="DE" />
+    <item android:id="@+id/fr"
+        android:title="FR" />
+    <item android:id="@+id/search"
+        android:title="SEARCH" />
+    <item android:id="@+id/editor"
+        android:title="EDITORS" />
+</menu>
