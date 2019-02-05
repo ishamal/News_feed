@@ -10,17 +10,18 @@ import android.widget.TextView;
 
 import com.test.ishara.newsfeed.R;
 import com.test.ishara.newsfeed.dto.ArticlesDto;
+import com.test.ishara.newsfeed.dto.SourceDto;
 
 import java.util.List;
 
-public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder>{
+public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.ViewHolder>{
 
-    List<ArticlesDto> articlesDtos;
+    List<SourceDto> articlesDtos;
     private LayoutInflater mInflater;
     Context context;
     private ItemClickListener mClickListener;
 
-    public NewsAdapter(List<ArticlesDto> articlesDtos, Context context) {
+    public SourceAdapter(List<SourceDto> articlesDtos, Context context) {
         this.mInflater = LayoutInflater.from(context);
         this.articlesDtos = articlesDtos;
         this.context = context;
@@ -35,8 +36,8 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        ArticlesDto animal = articlesDtos.get(i);
-        viewHolder.myTextView.setText(animal.getTitle());
+        SourceDto animal = articlesDtos.get(i);
+        viewHolder.myTextView.setText(animal.getName());
     }
 
     @Override
@@ -60,11 +61,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder>{
         }
     }
 
-    public ArticlesDto getItem(int id) {
-        return articlesDtos.get(id);
-    }
-
-   public void setClickListener(ItemClickListener itemClickListener) {
+    void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 
