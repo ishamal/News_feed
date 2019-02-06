@@ -14,5 +14,12 @@ public interface DataService {
 
     @GET("/v2/sources")
     Call<SourceResultDto> getSourse(@Query("country") String country, @Query("apiKey") String apiKey);
+
+    @GET("/v2/everything")
+    Call<ResultDto> search(@Query("q") String q
+            , @Query("from") String from
+            , @Query("to") String to
+            , @Query("sortBy") String sortBy
+            , @Query("apiKey") String apiKey);
     
 }

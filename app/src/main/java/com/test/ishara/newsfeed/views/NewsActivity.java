@@ -2,6 +2,8 @@ package com.test.ishara.newsfeed.views;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,11 +11,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.test.ishara.newsfeed.R;
 import com.test.ishara.newsfeed.adapter.NewsAdapter;
+import com.test.ishara.newsfeed.dialog.SearchDialog;
 import com.test.ishara.newsfeed.dto.ResultDto;
+import com.test.ishara.newsfeed.dto.SearchDto;
+import com.test.ishara.newsfeed.interfaces.SearchCallback;
 import com.test.ishara.newsfeed.rest.DataService;
 import com.test.ishara.newsfeed.rest.RetrofitClientInstance;
 import com.test.ishara.newsfeed.utils.Utils;
@@ -22,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewsActivity extends AppCompatActivity implements NewsAdapter.ItemClickListener{
+public class NewsActivity extends AppCompatActivity implements NewsAdapter.ItemClickListener, SearchCallback {
 
     private RecyclerView recyclerView;
     ProgressDialog progressDoalog;
@@ -86,7 +93,13 @@ public class NewsActivity extends AppCompatActivity implements NewsAdapter.ItemC
                 getData("de", false);
                 return true;
             case R.id.search:
-                // do your code
+                SearchDialog searchDialog = new SearchDialog(NewsActivity.this, this);
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(searchDialog.getWindow().getAttributes());
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+                searchDialog.show();
+                searchDialog.getWindow().setAttributes(lp);
                 return true;
             case R.id.editor:
                 Intent intent = new Intent(NewsActivity.this, SourseFeedActivity.class);
@@ -103,5 +116,45 @@ public class NewsActivity extends AppCompatActivity implements NewsAdapter.ItemC
         detailIntent.putExtra("MyClass", newsAdapter.getItem(position));
 //        Toast.makeText(this, "You clicked " + newsAdapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
         startActivity(detailIntent);
+    }
+
+    @Override
+    public void onOkBtnClicked(SearchDto searchDto) {
+        if (searchDto.getKeyWord() != null && !searchDto.getKeyWord().trim().equals("")) {
+            initSearch(searchDto);
+        }
+    }
+
+    public void initSearch(SearchDto searchDto){
+        progressDoalog.show();
+        DataService dataService = RetrofitClientInstance.getRetrofitInstance().create(DataService.class);
+        Call<ResultDto> call = dataService.search(searchDto.getKeyWord()
+                , searchDto.getFromDate()
+                , searchDto.getToDate()
+                , searchDto.getSortBy()
+                , Utils.API_Key);
+        call.enqueue(new Callback<ResultDto>() {
+            @Override
+            public void onResponse(Call<ResultDto> call, Response<ResultDto> response) {
+                if (response.body().getArticlesDtos().size() > 0) {
+                    newsAdapter = new NewsAdapter(response.body().getArticlesDtos(), NewsActivity.this);
+                    newsAdapter.setClickListener(NewsActivity.this);
+                    recyclerView.swapAdapter(newsAdapter, false);
+                    progressDoalog.dismiss();
+                } else {
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "No Records Found !!!!",
+                            Toast.LENGTH_SHORT);
+
+                    toast.show();
+                }
+                progressDoalog.dismiss();
+            }
+
+            @Override
+            public void onFailure(Call<ResultDto> call, Throwable t) {
+                progressDoalog.dismiss();
+            }
+        });
     }
 }
